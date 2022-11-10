@@ -3,11 +3,10 @@ import styled from 'styled-components'
 import { CSSReset } from '../src/components/CSSReset'
 import Menu from '../src/components/Menu'
 import { StyledTimeline } from '../src/components/TimeLine'
+import React from 'react'
 
 function HomePage() {
-    const style = {
-        //backgroundColor: "red"
-    }
+    const [valorDaBusca, setValorDaBusca] = React.useState("")
 
     return (
         <>
@@ -17,23 +16,15 @@ function HomePage() {
                 flexDirection: "column",
                 flex: 1
             }}>
-                <Menu/>
+                <Menu valorDaBusca={valorDaBusca} setValorDaBusca={setValorDaBusca}/>
                 <Header/>
-                <TimeLine playlists={config.playlists}/>
+                <TimeLine playlists={config.playlists} searchValueState={valorDaBusca}/>
             </div>
         </>
     )
 }
 
 export default HomePage
-
-//function Menu() {
-//    return (
-//        <div>
-//            Menu
-//        </div>
-//    )
-//}
 
 const StyledHeader = styled.div`
      img {
@@ -42,7 +33,6 @@ const StyledHeader = styled.div`
         border-radius: 50%;
      }
      .user-info {
-        margin-top: 50px;
         display: flex;
         align-items: center;
         width: 100%;
@@ -51,11 +41,19 @@ const StyledHeader = styled.div`
      }
 `;
 
+const StyledBanner = styled.div`
+     background-color: blue;
+     background-image: url(${({bg}) => {
+        return bg
+     }});
+     height: 230px;
+`;
+
 function Header() {
     return (
         <StyledHeader>
             <section>
-                Banner
+                <StyledBanner bg={config.bg}/>
             </section>
             <section className="user-info">
                 <img src={`https://github.com/${config.github}.png`}/>
@@ -72,26 +70,30 @@ function Header() {
     )
 }
 
-function TimeLine(props) {
-    const playlistsNames = Object.keys(props.playlists)
+function TimeLine({playlists, searchValueState}) {
+    const playlistsNames = Object.keys(playlists)
+    
     return (
         <StyledTimeline>
             {
                 playlistsNames.map(
                     (playlistName) => {
-                        const playlist = props.playlists[playlistName]
-                        console.log(playlist)
+                        const playlist = playlists[playlistName]
                         return (
-                            <section>
+                            <section key={playlistName}>
                                 <h2>
                                     {playlistName}
                                 </h2>
                                 <div>
                                     {
-                                        playlist.map(
+                                        playlist.filter((video) => {
+                                            const titleNormalized = video.title.toLowerCase()
+                                            const searchValueStateNormalized = searchValueState.toLowerCase()
+                                            return titleNormalized.includes(searchValueStateNormalized)
+                                        }).map(
                                             (video) => {
                                                 return (
-                                                    <a href={video.url}>
+                                                    <a key={video.url} href={video.url}>
                                                         <img src={video.thumb}/>
                                                         <span>
                                                             {video.title}
